@@ -1,54 +1,33 @@
 package com.example.prv2
 
-import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons.Filled
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,13 +36,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.prv2.R
 import com.example.prv2.ui.theme.PrvTheme
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
@@ -72,78 +52,71 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PrvTheme {
-                MyApp(modifier = Modifier.fillMaxSize())
+                OnboardingScreen(
+                    ClickAboutme = {
+                    val intent = Intent(this@MainActivity, ActivityAbout::class.java)
+                startActivity(intent)
+            },
+                    ClickEdu = {
+                        val intent = Intent(this@MainActivity, ActivityEdu::class.java)
+                        startActivity(intent)
+                    },
+                    ClickContact = {
+                        val intent = Intent(this@MainActivity, ActivityCont::class.java)
+                        startActivity(intent)
+                    })
             }
         }
     }
-    private fun OnContactsClicked(texts: List<String>) {
-        println(texts)
-        // Ваш код обработки нажатия на кнопку Contact's
-        // Например, открытие новой активити, переход по ссылке и т.д.
-    }
 }
+class DataFetcher(databaseReference: DatabaseReference) {
+    var email by mutableStateOf("")
+        private set
+    var messenger by mutableStateOf("")
+        private set
+    var phone by mutableStateOf("")
+        private set
+    var mainTitle by mutableStateOf("")
+        private set
+    var butEduEn by mutableStateOf("")
+        private set
+    var butEduRu by mutableStateOf("")
+        private set
+    init {
+        val valueEventListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val data = snapshot.value as? Map<*, *>
+                    data?.let {
+                        email = data["email"].toString()
+                        messenger = data["messenger"].toString()
+                        phone = data["phone"].toString()
+                        mainTitle = data["mainTitle"].toString()
+                        butEduEn = data["butEduEn"].toString()
+                        butEduRu = data["butEduRu"].toString()
+                    }
+                }
+            }
 
-@Composable
-fun MyApp(modifier: Modifier = Modifier) {
-    var shouldShowOnboarding by rememberSaveable { mutableStateOf(true) }
-
-    val greetings = listOf(
-        "CV",
-        "Educatıon",
-        "About me",
-        "Contacts",
-        "About App"
-    )
-    val titls = listOf(
-        "Резюме",
-        "Образование",
-        "Обо мне",
-        "Контакты",
-        "О приложении"
-    )
-    val url = "https://example.com"
-    val texts = listOf(
-        "292929",
-        "Rubius LLC\n" +
-                "\n" +
-                "Повышение квалификации \"Project Manager\"\n" +
-                "\n" +
-                "Квалификация: \"Менеджер проектов в IT\"\n" +
-                "\n" +
-                "Год окончания: 2023\n" +
-                "\n" +
-                "ООО «Нетология»\n" +
-                "\n" +
-                "Программа профессиональной переподготовки Project manager\n" +
-                "\n" +
-                "Квалификация: Руководитель в области информационных технологий\n" +
-                "\n" +
-                "Год окончания: 2022\n",
-        "292929",
-        "Мобильный: +7 (900) 922-38-67\n" +
-                "Мессенджеры: +7 (952) 803-56-13\n" +
-                "E-mail: info@popovrv.org\n" +
-                "LinkedIN https://www.linkedin.com/in/roman-popov1989/",
-        "| Kotlin | Jetpack Compose |  Android Studio Flamingo 2022.2.1 |"
-    )
-    val onContactsClicked: () -> Unit = {
-        // Ваш код обработки нажатия на кнопку Contact's
-        // Например, открытие новой активити, переход по ссылке и т.д.
-    }
-    Surface(modifier, color = MaterialTheme.colorScheme.background) {
-        if (shouldShowOnboarding) {
-            OnboardingScreen(onContinueClicked = { shouldShowOnboarding = false }, onContactsClicked = onContactsClicked)
-        } else {
-            Greetings(greetings, texts, titls)
+            override fun onCancelled(error: DatabaseError) {
+                // Обработка ошибок
+            }
         }
+
+        // Включаем слушатель при создании экземпляра DataFetcher
+        databaseReference.addValueEventListener(valueEventListener)
     }
 }
-
-////new start///
+fun connectToFirebaseAndFetchData(): DataFetcher {
+    val databaseReference = FirebaseDatabase.getInstance("https://popovkotlin-67a40-default-rtdb.firebaseio.com").reference
+    return DataFetcher(databaseReference)
+}
+val dataFetcher = connectToFirebaseAndFetchData()
 @Composable
 fun OnboardingScreen(
-    onContinueClicked: () -> Unit,
-    onContactsClicked: () -> Unit,
+    ClickAboutme: () -> Unit,
+    ClickEdu: () -> Unit,
+    ClickContact: () -> Unit,
     buttonHeight: Dp = 50.dp, // Размер высоты кнопки (по умолчанию 48.dp)
     buttonWidth: Dp = 180.dp, // Размер ширины кнопки (по умолчанию 180.dp)
     modifier: Modifier = Modifier
@@ -189,7 +162,7 @@ fun OnboardingScreen(
                     .widthIn(min = 160.dp, max = 260.dp)
                     .clip(RoundedCornerShape(120.dp))
             )
-            Text("Welcome to my first App on the Kotlin")
+            Text("${dataFetcher.mainTitle}")
         }
     else
         Column() {
@@ -244,7 +217,7 @@ fun OnboardingScreen(
                     .height(buttonHeight)
                     .width(buttonWidth)
                     .alpha(buttonAlpha),
-                onClick = onContinueClicked
+                onClick = { ClickAboutme() }
 
             ) {
                 Text("About me")
@@ -263,9 +236,9 @@ fun OnboardingScreen(
                     .height(buttonHeight)
                     .width(buttonWidth)
                     .alpha(secondButtonAlpha),
-                onClick = onContinueClicked
+                onClick = { ClickEdu() }
             ) {
-                Text("Education")
+                Text("${dataFetcher.butEduEn}")
             }
         }
     }
@@ -282,112 +255,10 @@ fun OnboardingScreen(
                     .height(buttonHeight)
                     .width(buttonWidth)
                     .alpha(cvButtonAlpha),
-                onClick = onContactsClicked
+                onClick = { ClickContact() }
             ) {
                 Text("Contact`s")
             }
         }
     }
-
 }
-
-
-@Composable
-fun Greetings(greetings: List<String>, texts: List<String>, titls: List<String>) {
-    LazyColumn(modifier = Modifier.padding(vertical = 4.dp)) {
-        itemsIndexed(items = greetings) { index, greeting ->
-            Greeting(greeting = greeting, text = texts[index], titls = titls[index])
-        }
-    }
-}
-
-@Composable
-private fun Greeting(greeting: String, text: String, titls: String) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary
-        ),
-        modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
-    ) {
-        CardContent(greeting = greeting, text = text, titls = titls)
-    }
-}
-
-@Composable
-private fun CardContent(greeting: String, text: String, titls: String) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = Modifier
-            .padding(12.dp)
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            )
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(12.dp)
-        ) {
-            Text(text = titls)
-            Text(
-                text = greeting, style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.ExtraBold
-                )
-            )
-            if (expanded) {
-                Text(
-                    text = text.repeat(1),
-                )
-            }
-        }
-        IconButton(onClick = { expanded = !expanded }) {
-            Icon(
-                imageVector = if (expanded) Filled.ExpandLess else Filled.ExpandMore,
-                contentDescription = if (expanded) {
-                    stringResource(R.string.show_less)
-                } else {
-                    stringResource(R.string.show_more)
-                }
-            )
-        }
-    }
-}
-
-@Preview(
-    showBackground = true,
-    widthDp = 320,
-    uiMode = UI_MODE_NIGHT_YES,
-    name = "DefaultPreviewDark"
-)
-@Preview(showBackground = true, widthDp = 320)
-@Composable
-fun DefaultPreview() {
-    PrvTheme {
-        val titls = listOf("2344", "34534", "3242", "2353453", "1088888")
-        val greetings = listOf("2344", "34534", "3242", "2353453", "1088888")
-        val texts = listOf("292929","пуаакцаууу","292929","пуаакцаууу","11111111")
-        Greetings(titls, texts,greetings)
-    }
-}
-/*
-@Preview(showBackground = true, widthDp = 320, heightDp = 320)
-@Composable
-fun OnboardingPreview() {
-    PrvTheme {
-        OnboardingScreen(onContinueClicked = {})
-    }
-}
-
-@Preview
-@Composable
-fun MyAppPreview() {
-    PrvTheme {
-        MyApp(Modifier.fillMaxSize())
-    }
-}
-
- */

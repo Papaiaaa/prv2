@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1041892001592",
+    "project_id": "popovkotlin-67a40",
+    "storage_bucket": "popovkotlin-67a40.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041892001592:android:98b6da7bae21958efe63cd",
+        "android_client_info": {
+          "package_name": "com.example.prv2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1041892001592-pdi2q030ispqnqiiieiolu16j6a6q5fp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.prv2",
+            "certificate_hash": "99e78e266a232a1fcbe60fcdfd69a36931705fe1"
+          }
+        },
+        {
+          "client_id": "1041892001592-jqjsnvssuuqoin7khjc5edmkvccrifhk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5G7V9fTYaz877U0K2NhKxl6oa5fcPV04"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1041892001592-jqjsnvssuuqoin7khjc5edmkvccrifhk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
